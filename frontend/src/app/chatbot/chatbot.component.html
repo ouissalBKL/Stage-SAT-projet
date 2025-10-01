@@ -1,0 +1,70 @@
+<!-- Modal pour la sélection du spécialiste -->
+<div *ngIf="showSpecialistModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2>Bonjour et bienvenue.</h2>
+    <p>Pour vous offrir un accompagnement optimal, merci de nous indiquer si vous êtes un(e) spécialiste en approvisionnement.</p>
+    <div class="modal-options">
+      <button class="modal-option-btn" (click)="onSpecialistSelection(true)">
+        <input type="radio" name="specialist" [value]="true">
+        Oui, je suis spécialiste
+      </button>
+      <button class="modal-option-btn" (click)="onSpecialistSelection(false)">
+        <input type="radio" name="specialist" [value]="false">
+        Non, je ne le suis pas
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="professional-header">
+  <div class="header-inner">
+    <div class="logo-container" aria-hidden="true">
+      <i class="fas fa-robot" style="font-size: 32px; color: #0ea5e9;"></i>
+    </div>
+    <div class="header-texts">
+      <h1>Assistant Approvisionnement</h1>
+    </div>
+  </div>
+</header>
+
+<!-- Container des messages -->
+<div class="container" #messagesContainer>
+  <div 
+    *ngFor="let message of messages" 
+    class="message"
+    [class.user]="message.isUser"
+    [class.bot]="!message.isUser"
+  >
+    <div [innerHTML]="formatMessage(message.content)"></div>
+    <button 
+      *ngIf="!message.isUser" 
+      class="copy-btn" 
+      (click)="copyToClipboard(message.content)"
+    >
+      Copier
+    </button>
+  </div>
+</div>
+
+<!-- Zone de saisie -->
+<div class="input-container">
+  <textarea 
+    #questionInput
+    [(ngModel)]="question"
+    (keydown)="onKeyDown($event)"
+    placeholder="Écris ta question ici..."
+    [disabled]="isLoading"
+  ></textarea>
+  <button 
+    class="send-btn" 
+    (click)="askQuestion()" 
+    [disabled]="isLoading || !question.trim()"
+    aria-label="Envoyer la question"
+  >
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+    </svg>
+  </button>
+</div>
+
