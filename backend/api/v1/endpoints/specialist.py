@@ -1,20 +1,18 @@
-
-from fastapi import APIRouter, Request
-from services.specialist_service import set_specialist
+from fastapi import APIRouter, Query, Depends, HTTPException
+from sqlalchemy.orm import Session
+from database import get_db
+from services.specialist_service import get_specialist
 
 router = APIRouter()
 
 
-@router.post("/set_specialist")
-async def set_specialist_route(request: Request):
-    data = await request.json()
-    answer = data.get("answer")
-    if answer == "oui":
-        set_specialist(True)
-        message = "Parfait ! Je vais adapter mes réponses à votre niveau d'expertise."
-    elif answer == "non":
-        set_specialist(False)
-        message = "Parfait ! Je vais vous expliquer les concepts de manière claire et accessible."
-    else:
-        message = "Réponse non reconnue."
-    return {"message": message}
+@router.get("/status")
+def specialist_status(
+    email: str = Query(..., description="Email de l'utilisateur"),
+    db: Session = Depends(get_db),
+):
+    """Retourne le statut specialist (true/false) pour l'email fourni."""
+    specialist = get_specialist(email, db)
+    if specialist is None:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    return {"email": email, "specialist": specialist}

@@ -1,29 +1,12 @@
-<!-- Modal pour la sélection du spécialiste -->
-<div *ngIf="showSpecialistModal" class="modal-overlay">
-  <div class="modal-content">
-    <h2>Bonjour et bienvenue.</h2>
-    <p>Pour vous offrir un accompagnement optimal, merci de nous indiquer si vous êtes un(e) spécialiste en approvisionnement.</p>
-    <div class="modal-options">
-      <button class="modal-option-btn" (click)="onSpecialistSelection(true)">
-        <input type="radio" name="specialist" [value]="true">
-        Oui, je suis spécialiste
-      </button>
-      <button class="modal-option-btn" (click)="onSpecialistSelection(false)">
-        <input type="radio" name="specialist" [value]="false">
-        Non, je ne le suis pas
-      </button>
-    </div>
-  </div>
-</div>
 
-<!-- Header -->
+<!-- Header avec nom utilisateur -->
 <header class="professional-header">
-  <div class="header-inner">
-    <div class="logo-container" aria-hidden="true">
-      <i class="fas fa-robot" style="font-size: 32px; color: #0ea5e9;"></i>
-    </div>
-    <div class="header-texts">
-      <h1>Assistant Approvisionnement</h1>
+  <div class="header-inner" style="display:flex;align-items:center;width:100%;padding:0.5em 1.5em 0.5em 0.7em;">
+    <div class="logo-title" style="display:flex;align-items:center;gap:1em;flex-grow:1;">
+      <div class="logo-container" tabindex="0" title="{{userName}}" style="cursor: pointer;">
+        <i class="fas fa-user-circle" style="font-size: 32px; color: #1976d2;"></i>
+      </div>
+      <h1 style="margin:0;font-size:1.45em;letter-spacing:0.01em;">Assistant Approvisionnement</h1>
     </div>
   </div>
 </header>

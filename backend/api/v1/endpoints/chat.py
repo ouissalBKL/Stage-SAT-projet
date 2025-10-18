@@ -16,26 +16,31 @@ def clean_response(text: str) -> str:
     """Nettoie la réponse des balises markdown indésirables"""
     if not text:
         return text
-    
+
     # Supprimer les balises de header markdown
-    text = re.sub(r'<\|header_start\|>', '', text)
-    text = re.sub(r'<\|header_end\|>', '', text)
-    text = re.sub(r'<\|.*?\|>', '', text)  # Supprimer toutes les balises <|...|>
-    
+    text = re.sub(r"<\|header_start\|>", "", text)
+    text = re.sub(r"<\|header_end\|>", "", text)
+    text = re.sub(r"<\|.*?\|>", "", text)  # Supprimer toutes les balises <|...|>
+
     # Supprimer les balises HTML indésirables
-    text = re.sub(r'<[^>]+>', '', text)
-    
+    text = re.sub(r"<[^>]+>", "", text)
+
     # Nettoyer les espaces multiples
-    text = re.sub(r'\s+', ' ', text).strip()
-    
+    text = re.sub(r"\s+", " ", text).strip()
+
     return text
 
 
+from fastapi import Depends
+from database import get_db
+
+
 @router.post("/ask")
-async def ask_api(request: Request):
+async def ask_api(request: Request, db=Depends(get_db)):
     try:
         data = await request.json()
         question = data.get("question", "").strip()
+        email = data.get("email")
 
         # 1 Détection de l’intention
         intent = detect_intent_with_llm(question)
@@ -44,10 +49,10 @@ async def ask_api(request: Request):
         sku_number = extract_sku_with_llm(question) if intent == "prediction" else None
 
         # 3 Récupération du contexte RAG
-        contexte = search_similarity(question, k=2)
-
+        contexte = search_similarity(question)
+    
         # 4 Détection du style selon le type d'utilisateur
-        user_is_specialist = get_specialist()
+        user_is_specialist = get_specialist(email, db) if email else None
         if user_is_specialist is True:
             prompt_style = "Utilise un langage technique et concis."
         elif user_is_specialist is False:
@@ -65,8 +70,7 @@ async def ask_api(request: Request):
             f"'Je suis ici pour vous offrir des réponses concernant l’approvisionnement. "
             f"Merci de poser une question en lien avec ce domaine.'\n"
             f"{prompt_style}\n"
-            f"Contexte :\n{contexte}\n"
-            f"Question : {question}\n"
+            f"Repondez à cette question {question} en se basant sur le contexte suivant {contexte}"
         )
 
         # 6 Logique principale selon l’intention

@@ -97,3 +97,8 @@ ng serve --open
 4. Push vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
 5. Créer une Pull Request
 
+
+
+
+
+

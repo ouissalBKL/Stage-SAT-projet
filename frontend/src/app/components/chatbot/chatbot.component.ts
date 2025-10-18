@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { UserSessionService } from '../../services/user-session.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatbotService } from '../services/chatbot.service';
+import { ChatbotService } from '../../services/chatbot.service';
 
 interface Message {
   content: string;
@@ -23,65 +24,54 @@ export class ChatbotComponent implements OnInit, AfterViewInit {
   messages: Message[] = [];
   question: string = '';
   isLoading: boolean = false;
-  showSpecialistModal: boolean = true;
+  showSpecialistModal: boolean = false;
   isSpecialist: boolean | null = null;
+  userName: string = '';
 
-  constructor(private chatbotService: ChatbotService) {}
+  constructor(private chatbotService: ChatbotService, private userSession: UserSessionService) {}
 
   ngOnInit() {
-    // Message de bienvenue
-    this.messages.push({
-      content: "Bienvenue ! Je suis votre assistant virtuel en gestion des approvisionnements, prêt à vous accompagner.",
-      isUser: false,
-      timestamp: new Date()
-    });
+    const user = this.userSession.getUser();
+    if (user) {
+      this.userName = (user.first_name && user.last_name) ? `${user.first_name} ${user.last_name}` : (user.first_name || user.last_name || '');
+      this.isSpecialist = user.specialist ?? null;
+  let welcomeMsg = `Bienvenue ${this.userName} ! Je suis votre assistant virtuel en gestion des approvisionnements, prêt à vous accompagner.`;
+      this.messages.push({
+        content: welcomeMsg,
+        isUser: false,
+        timestamp: new Date()
+      });
+      if (this.isSpecialist === true) {
+        this.messages.push({
+          content: "Puisque vous êtes spécialiste, je vais vous donner des réponses adaptées à votre niveau d'expertise.",
+          isUser: false,
+          timestamp: new Date()
+        });
+      } else if (this.isSpecialist === false) {
+        this.messages.push({
+          content: "Puisque vous n'êtes pas spécialiste, je vais vous expliquer les concepts de façon claire et accessible.",
+          isUser: false,
+          timestamp: new Date()
+        });
+      }
+    } else {
+      this.messages.push({
+        content: "Bienvenue ! Je suis votre assistant virtuel en gestion des approvisionnements, prêt à vous accompagner.",
+        isUser: false,
+        timestamp: new Date()
+      });
+    }
   }
 
   ngAfterViewInit() {
     this.scrollToBottom();
   }
 
-  onSpecialistSelection(isSpecialist: boolean) {
-    // Protection contre les clics multiples
-    if (this.isSpecialist !== null) {
-      return;
-    }
-    
-    this.isSpecialist = isSpecialist;
-    this.showSpecialistModal = false;
-    
-       // Ajouter un message de confirmation personnalisé (sans supprimer le message de bienvenue)
-       const confirmationMessage = isSpecialist 
-       ? "Vous êtes un spécialiste. Je vais adapter mes réponses à votre niveau d'expertise."
-       : "Vous n'êtes pas spécialiste. Je vais vous expliquer les concepts de manière claire et accessible.";
-     
-    this.messages.push({
-      content: confirmationMessage,
-      isUser: false,
-      timestamp: new Date()
-    });
-    
-    this.scrollToBottom();
-    
-    // Appel au backend sans afficher sa réponse
-    this.chatbotService.setSpecialist(isSpecialist).subscribe({
-      next: (response) => {
-        // Ne rien faire avec la réponse du backend
-      },
-      error: (error) => {
-        console.error('Erreur lors de la définition du spécialiste:', error);
-        alert('Erreur lors de l\'envoi de votre réponse.');
-      }
-    });
-  }
+
 
   async askQuestion() {
     if (!this.question.trim()) return;
     
-    if (this.isSpecialist === null) {
-      alert("Veuillez d'abord répondre au mini questionnaire.");
-      return;
-    }
 
     // Supprimer le message de bienvenue s'il existe
     if (this.messages.length > 0 && this.messages[0].content.includes("Bienvenue")) {

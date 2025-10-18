@@ -1,0 +1,43 @@
+<div class="auth-container">
+  <!-- Formulaire de connexion -->
+  <form *ngIf="isLoginMode" (ngSubmit)="onLogin()">
+    <h2 class="form-title">Connexion</h2>
+    <div class="form-group">
+      <input type="text" placeholder="Email" [(ngModel)]="loginData.email" name="loginEmail" required />
+    </div>
+    <div class="form-group">
+      <input type="password" placeholder="Mot de passe" [(ngModel)]="loginData.password" name="loginPassword" required />
+    </div>
+    <button type="submit">Se connecter</button>
+    <p>Pas de compte ? <a href="#" (click)="isLoginMode=false">S'inscrire</a></p>
+  </form>
+
+  <!-- Formulaire d'inscription -->
+  <form *ngIf="!isLoginMode" #registerForm="ngForm" (ngSubmit)="onRegister()">
+    <h2 class="form-title">Inscription</h2>
+    <div class="form-group">
+      <input type="text" placeholder="Prénom" [(ngModel)]="registerData.first_name" name="registerFirstName" required #firstName="ngModel" />
+      <div *ngIf="firstName.invalid && firstName.touched" class="error">Prénom requis</div>
+    </div>
+    <div class="form-group">
+      <input type="text" placeholder="Nom" [(ngModel)]="registerData.last_name" name="registerLastName" required #lastName="ngModel" />
+      <div *ngIf="lastName.invalid && lastName.touched" class="error">Nom requis</div>
+    </div>
+    <div class="form-group">
+      <input type="email" placeholder="Email" [(ngModel)]="registerData.email" name="registerEmail" required email #email="ngModel" />
+      <div *ngIf="email.invalid && email.touched" class="error">Email valide requis</div>
+    </div>
+    <div class="form-group">
+      <input type="password" placeholder="Mot de passe" [(ngModel)]="registerData.password" name="registerPassword" required minlength="6" #password="ngModel" />
+      <div *ngIf="password.invalid && password.touched" class="error">Mot de passe requis (6 caractères min)</div>
+    </div>
+    <label class="specialist-checkbox">
+      <input type="checkbox" [(ngModel)]="registerData.specialist" name="registerSpecialist" />
+      <span>Je suis un spécialiste</span>
+    </label>
+    <button type="submit" [disabled]="registerForm.invalid">S'inscrire</button>
+    <p>Déjà un compte ? <a href="#" (click)="isLoginMode=true">Se connecter</a></p>
+  </form>
+
+  <div *ngIf="errorMessage" class="error-message">{{errorMessage}}</div>
+</div>

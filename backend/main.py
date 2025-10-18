@@ -1,6 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.v1.endpoints import chat, specialist, predict
+from api.v1.endpoints import chat, specialist, predict, user
+from database import Base, engine
+import models.user  # importe tous les modèles pour que SQLAlchemy les connaisse
+
+
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -17,3 +23,4 @@ app.add_middleware(
 app.include_router(chat.router, prefix="/api/v1/endpoints", tags=["chat"])
 app.include_router(specialist.router, prefix="/api/v1/endpoints", tags=["specialist"])
 app.include_router(predict.router, prefix="/api/v1/endpoints", tags=["predict"])
+app.include_router(user.router, prefix="/api/v1/endpoints", tags=["user"])
