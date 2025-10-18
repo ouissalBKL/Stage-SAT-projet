@@ -3,14 +3,15 @@ import joblib
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from tensorflow.keras.models import load_model
+#from tensorflow.keras.models import load_model
+import tensorflow as tf
 from pgmpy.inference import VariableElimination
 
 # =========================
 # 1️⃣ Charger les modèles et objets sérialisés
 # =========================
 
-cnn_model = load_model("ML_Models/cnn_model.h5")  # ton CNN
+cnn_model = tf.keras.models.load_model("ML_Models/cnn_model.h5")  # ton CNN
 model_bn = joblib.load("ML_Models/bayesian_model.pkl")  # BN
 discretization_edges = joblib.load(
     "ML_Models/discretization_edges.pkl"
