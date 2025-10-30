@@ -8,31 +8,14 @@ from services.extractor_sku import extract_sku_with_llm
 from services.db_acess import get_product_features
 from services.prediction_service import predict_from_features
 import re
+from fastapi import Depends
+from database import get_db
+from services.response_service import clean_response    
 
 router = APIRouter()
 
 
-def clean_response(text: str) -> str:
-    """Nettoie la réponse des balises markdown indésirables"""
-    if not text:
-        return text
 
-    # Supprimer les balises de header markdown
-    text = re.sub(r"<\|header_start\|>", "", text)
-    text = re.sub(r"<\|header_end\|>", "", text)
-    text = re.sub(r"<\|.*?\|>", "", text)  # Supprimer toutes les balises <|...|>
-
-    # Supprimer les balises HTML indésirables
-    text = re.sub(r"<[^>]+>", "", text)
-
-    # Nettoyer les espaces multiples
-    text = re.sub(r"\s+", " ", text).strip()
-
-    return text
-
-
-from fastapi import Depends
-from database import get_db
 
 
 @router.post("/ask")
@@ -53,25 +36,35 @@ async def ask_api(request: Request, db=Depends(get_db)):
     
         # 4 Détection du style selon le type d'utilisateur
         user_is_specialist = get_specialist(email, db) if email else None
+        # Définition du style selon l’utilisateur
         if user_is_specialist is True:
-            prompt_style = "Utilise un langage technique et concis."
+            prompt_style_text = (
+            "Vous êtes un assistant expert en gestion d'approvisionnement. "
+             "Répondez de manière technique, précise et concise, adaptée à un spécialiste du domaine."
+    )
         elif user_is_specialist is False:
-            prompt_style = "Explique de façon claire et bien détaillée, accessible à un non-spécialiste."
+            prompt_style_text = (
+            "Vous êtes un assistant en gestion d'approvisionnement. "
+            "Répondez de manière claire, détaillée et pédagogique, adaptée à un non-spécialiste."
+    )
         else:
-            prompt_style = "Explique la réponse de manière simple et courte."
+            prompt_style_text = (
+            "Vous êtes un assistant en gestion d'approvisionnement. "
+            " Répondez simplement et de façon courte, accessible à tout utilisateur."
+    )
 
-        # 5 Construction du prompt pour RAG
+# Prompt final pour le LLM
         prompt = (
-            f"Vous êtes un assistant en gestion d'approvisionnement. "
-            f"Si la question est une salutation (par ex. 'bonjour', 'salut', 'hello'), "
-            f"répondez par une salutation polie et adaptée. "
-            f"Répondez uniquement aux questions pertinentes à ce domaine . "
-            f"Sinon, dites : "
-            f"'Je suis ici pour vous offrir des réponses concernant l’approvisionnement. "
-            f"Merci de poser une question en lien avec ce domaine.'\n"
-            f"{prompt_style}\n"
-            f"Repondez à cette question {question} en se basant sur le contexte suivant {contexte}"
-        )
+        f"{prompt_style_text}\n\n"
+        f"Instructions importantes :\n"
+        f"- Ne répondez qu'aux questions liées à la gestion d'approvisionnement.\n"
+        f"- Si la question est une salutation (ex. 'bonjour', 'salut', 'hello'), répondez poliment.\n"
+        f"- Sinon, utilisez le contexte fourni ci-dessous pour formuler une réponse pertinente.\n\n"
+        f"Contexte : {contexte}\n\n"
+        f"Question : {question}\n\n"
+        f"Répondez en respectant strictement le style indiqué au début."
+)
+
 
         # 6 Logique principale selon l’intention
         if intent == "prediction":

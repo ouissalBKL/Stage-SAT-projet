@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class Auth {
   
-  private baseUrl = 'http://localhost:8000/api/v1/endpoints/users'; // correction de l'URL
+  private baseUrl = 'http://localhost:8000/api/v1/endpoints/users'; 
 
   constructor(private http: HttpClient) { }
 
