@@ -95,8 +95,10 @@ Une fois le traitement terminé :
 
 ## 🚀 Installation et Démarrage
 
-### 🔧 Backend (FastAPI)
-```bash
 cd backend
 pip install -r requirements.txt
-python main.py
+uvicorn main:app --reload
+cd frontend
+npm install
+ng serve
+
