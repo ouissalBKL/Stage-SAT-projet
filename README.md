@@ -7,7 +7,7 @@ Ce projet est un **chatbot intelligent spécialisé dans l’approvisionnement**
 ## 🏗️ Architecture
 
 <p align="center">
-  <img src="images/architecture.png" alt="Architecture du chatbot RAG" width="850">
+  <img src="Images/architecture.png" alt="Architecture du chatbot RAG" width="850">
 </p>
 
 ---
